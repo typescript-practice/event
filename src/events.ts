@@ -1,6 +1,6 @@
 'use strict'
-import {DEFAULT_MAX_LISTENER, NEW_LISTENER, REMOVE_LISTENER} from './lib/const'
-import {EventName, Events, ListenerFunction} from './lib/interface';
+import { DEFAULT_MAX_LISTENER, NEW_LISTENER, REMOVE_LISTENER } from './lib/const'
+import { EventName, Events, ListenerFunction } from './lib/interface'
 import {
   createListenerFunction,
   indexOfListener,
@@ -8,14 +8,14 @@ import {
   isPositiveNumber,
   isValidEventName,
   isValidListener
-} from './lib/utils';
+} from './lib/utils'
 
 /**
  */
 export default class EventEmitter {
-  private _events: Events = {};
-  private _maxListeners: number = DEFAULT_MAX_LISTENER;
-  private defaultMaxListeners: number = DEFAULT_MAX_LISTENER;
+  private _events: Events = {}
+  private _maxListeners: number = DEFAULT_MAX_LISTENER
+  private defaultMaxListeners: number = DEFAULT_MAX_LISTENER
 
   // /**
   //  * Reverts the global {@link EventEmitter} to its previous value and returns a reference to this version.
@@ -27,12 +27,13 @@ export default class EventEmitter {
   // }
 
   get _eventsCount() {
-    return this.eventNames().length;
+    return this.eventNames().length
   }
 
   setMaxListeners(maxListeners: number) {
-    if (!isPositiveNumber(maxListeners)) throw new TypeError('MaxListeners number must be a positive number!')
-    this._maxListeners = maxListeners;
+    if (!isPositiveNumber(maxListeners))
+      throw new TypeError('MaxListeners number must be a positive number!')
+    this._maxListeners = maxListeners
   }
 
   /**
@@ -44,14 +45,14 @@ export default class EventEmitter {
    * @return {boolean} Returns true if the event had listeners, false otherwise.
    */
   emit(eventName: EventName, ...args: any[]): boolean {
-    const _events = this._getEvents();
-    let flag = false;
+    const _events = this._getEvents()
+    let flag = false
     if (_events.hasOwnProperty(eventName)) {
       let listeners: ListenerFunction[] = _events[eventName]
       listeners.forEach(listenerFunction => listenerFunction.apply(this, args))
-      return listeners.length > 0;
+      return listeners.length > 0
     }
-    return false;
+    return false
   }
 
   /**
@@ -61,8 +62,8 @@ export default class EventEmitter {
    * @return {EventName[]}
    */
   eventNames(): EventName[] {
-    const _events = this._getEvents();
-    return Object.keys(_events) || [];
+    const _events = this._getEvents()
+    return Object.keys(_events) || []
   }
 
   /**
@@ -73,7 +74,7 @@ export default class EventEmitter {
    */
   getMaxListeners(): number {
     if (this._maxListeners === undefined) {
-      this._maxListeners = 0;
+      this._maxListeners = 0
     }
 
     return this._maxListeners
@@ -85,7 +86,7 @@ export default class EventEmitter {
    * @return {number}
    */
   listenerCount(eventName: EventName): number {
-    const _events = this._getEvents();
+    const _events = this._getEvents()
     if (_events.hasOwnProperty(eventName) && isArray(_events[eventName])) {
       return _events[eventName].length
     }
@@ -98,12 +99,12 @@ export default class EventEmitter {
    * @return {Function[]}
    */
   listeners(eventName: EventName): Function[] {
-    const _events = this._getEvents();
-    let _listeners: Function[] = [];
+    const _events = this._getEvents()
+    let _listeners: Function[] = []
     if (_events.hasOwnProperty(eventName)) {
-      let _rawListeners = _events[eventName];
+      let _rawListeners = _events[eventName]
       _rawListeners.forEach(item => {
-        _listeners.push(item.listener);
+        _listeners.push(item.listener)
       })
     }
     return _listeners
@@ -178,7 +179,7 @@ export default class EventEmitter {
    * @return {EventEmitter}
    */
   removeAllListeners(eventNames?: EventName[]): EventEmitter {
-    const _events = this._getEvents();
+    const _events = this._getEvents()
     if (eventNames && isArray(eventNames) && eventNames.length > 0) {
       // remove the specified eventName list
       for (const eventName in eventNames) {
@@ -192,7 +193,7 @@ export default class EventEmitter {
     }
 
     // The 'removeListener' event is emitted after the listener is removed.
-    this.emit(REMOVE_LISTENER);
+    this.emit(REMOVE_LISTENER)
 
     return this
   }
@@ -204,25 +205,25 @@ export default class EventEmitter {
    * @return {EventEmitter}
    */
   removeListener(eventName: EventName, listener: Function): EventEmitter {
-    const _events = this._getEvents();
-    if (!_events.hasOwnProperty(eventName)) return this;
+    const _events = this._getEvents()
+    if (!_events.hasOwnProperty(eventName)) return this
 
-    const listeners = _events[eventName];
+    const listeners = _events[eventName]
 
     if (isArray(listeners) && listeners.length > 0) {
-      const index = indexOfListener(listeners, listener);
+      const index = indexOfListener(listeners, listener)
 
       if (index !== -1) {
-        listeners.splice(index, 1);
+        listeners.splice(index, 1)
       }
     }
 
     if (!isArray(listeners) || listeners.length === 0) {
-      delete _events[eventName];
+      delete _events[eventName]
     }
 
     // The 'removeListener' event is emitted after the listener is removed.
-    this.emit(REMOVE_LISTENER);
+    this.emit(REMOVE_LISTENER)
 
     return this
   }
@@ -234,8 +235,8 @@ export default class EventEmitter {
    * @return {ListenerFunction[]}
    */
   rawListeners(eventName: EventName): ListenerFunction[] {
-    const _events = this._getEvents();
-    let _rawListeners: ListenerFunction[] = [];
+    const _events = this._getEvents()
+    let _rawListeners: ListenerFunction[] = []
     if (_events.hasOwnProperty(eventName)) {
       _rawListeners.concat(_events[eventName])
     }
@@ -249,14 +250,14 @@ export default class EventEmitter {
    * @private
    */
   private _checkIfMatchMaxListener(eventName: EventName): boolean {
-    if (this._maxListeners === undefined || this._maxListeners === 0) return false;
+    if (this._maxListeners === undefined || this._maxListeners === 0) return false
 
-    const _events = this._getEvents();
-    let _res = false;
+    const _events = this._getEvents()
+    let _res = false
 
     if (_events.hasOwnProperty(eventName) && isArray(_events[eventName])) {
-      const length = _events[eventName].length;
-      _res = length >= this._maxListeners;
+      const length = _events[eventName].length
+      _res = length >= this._maxListeners
       if (_res) {
         console.warn(`
         The current event ${eventName}(${length}) has exceeded the maximum 
@@ -278,25 +279,32 @@ export default class EventEmitter {
    * @return {EventEmitter}
    * @private
    */
-  private _addListener(eventName: EventName, listener: Function, once = false, prepend = false): EventEmitter {
-    if (!isValidEventName(eventName) || !isValidListener(listener)) new Error('[_addListener] invalid arguments!');
+  private _addListener(
+    eventName: EventName,
+    listener: Function,
+    once = false,
+    prepend = false
+  ): EventEmitter {
+    if (!isValidEventName(eventName) || !isValidListener(listener))
+      throw new TypeError('[_addListener] invalid arguments!')
 
-    const _events = this._getEvents();
+    const _events = this._getEvents()
 
     if (!_events.hasOwnProperty(eventName)) {
       _events[eventName] = []
     }
 
-    if (!isArray(_events[eventName])) new Error('[_addListener] events[eventName] must be array!');
+    if (!isArray(_events[eventName]))
+      throw new TypeError('[_addListener] events[eventName] must be array!')
 
-    const prependMethod = prepend ? 'unshift' : 'push';
+    const prependMethod = prepend ? 'unshift' : 'push'
 
     // emit "NEW_LISTENER" before added
-    this.emit(NEW_LISTENER);
+    this.emit(NEW_LISTENER)
 
-    _events[eventName][prependMethod](createListenerFunction(this, eventName, listener, once));
+    _events[eventName][prependMethod](createListenerFunction(this, eventName, listener, once))
 
-    this._checkIfMatchMaxListener(eventName);
+    this._checkIfMatchMaxListener(eventName)
 
     return this
   }
@@ -307,6 +315,6 @@ export default class EventEmitter {
    * @return {Events} The events storage object.
    */
   private _getEvents(): Events {
-    return this._events || (this._events = {});
-  };
+    return this._events || (this._events = {})
+  }
 }

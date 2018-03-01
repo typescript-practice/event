@@ -1,12 +1,12 @@
-export type EventName = string | symbol;
+export type EventName = string | symbol
 
 export interface Events {
-  [EventName: string]: ListenerFunction[] //Function | Function[]
+  [EventName: string]: ListenerFunction[]
 }
 
 export interface ListenerFunction {
-  (...args: any[]): any;
+  (...args: any[]): any
 
-  listener: Function,
-  once: Boolean,
+  listener: Function
+  once: Boolean
 }

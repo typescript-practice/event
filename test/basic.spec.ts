@@ -1,5 +1,8 @@
 'use strict'
 import EventEmitter from '../src/events'
+const NOOP = function() {
+  // empty
+}
 
 // Basics
 test('basic', cb => {
@@ -24,7 +27,7 @@ test('setMaxListeners(200)', () => {
   expect(events.getMaxListeners()).toEqual(200)
   expect(() => {
     events.setMaxListeners(-200)
-  }).toThrow(TypeError)
+  }).toThrow(Error)
 })
 
 test('on()&&emit()', function(this: any) {
@@ -51,29 +54,17 @@ test('on()&&emit()', function(this: any) {
 test('eventNames()', function(this: any) {
   const events = new EventEmitter()
   expect(events.eventNames()).toEqual([])
-  events.on('testName1', function() {
-    // empty
-  })
-  events.on('testName2', function() {
-    // empty
-  })
-  events.on('testName3', function() {
-    // empty
-  })
+  events.on('testName1', NOOP)
+  events.on('testName2', NOOP)
+  events.on('testName3', NOOP)
   expect(events.eventNames()).toEqual(['testName1', 'testName2', 'testName3'])
 })
 
 test('eventNames()', function(this: any) {
   const events = new EventEmitter()
-  events.on('testName1', function() {
-    // empty
-  })
-  events.on('testName1', function() {
-    // empty
-  })
-  events.on('testName1', function() {
-    // empty
-  })
+  events.on('testName1', NOOP)
+  events.on('testName1', NOOP)
+  events.on('testName1', NOOP)
   expect(events.listenerCount('testName1')).toEqual(3)
   expect(events.listenerCount('testNameX')).toEqual(0)
 })
@@ -236,7 +227,9 @@ test('removeListener()', function(this: any) {
   list.forEach(fn => {
     events.on('testName1', fn)
   })
-  events.removeListener('testName1', list[1])
+  expect(events.removeListener('testName1', list[1])).toEqual(events)
+  expect(events.removeListener('testName1', NOOP)).toEqual(events)
+  expect(events.removeListener('testNameX', NOOP)).toEqual(events)
   expect(events.listenerCount('testName1')).toEqual(4)
   events.off('testName1', list[2])
   expect(events.listenerCount('testName1')).toEqual(3)

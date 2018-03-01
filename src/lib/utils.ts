@@ -5,7 +5,7 @@ import EventEmitter from '../events'
 export function isValidListener(listener: Function) {
   const isValid = isFunction(listener)
   if (!isValid) {
-    console.warn(`the type of 'listener' is not valid`)
+    throw new TypeError(`[events] the type of 'listener' is not valid`)
   }
   return isValid
 }
@@ -13,7 +13,7 @@ export function isValidListener(listener: Function) {
 export function isValidEventName(eventName: EventName) {
   const isValid = isString(eventName) || isSymbol(eventName)
   if (!isValid) {
-    console.warn(`the type of 'eventName' is not valid`)
+    throw new TypeError(`[events] the type of 'eventName' is not valid`)
   }
   return isValid
 }

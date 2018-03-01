@@ -50,14 +50,16 @@ export default class EventEmitter {
    * can be set to Infinity (or 0) to indicate an unlimited
    * number of listeners.
    * @param {number} maxListeners - The number of max listeners.
-   * @return {number}
+   * @return {EventEmitter}
    */
-  setMaxListeners(maxListeners: number) {
+  setMaxListeners(maxListeners: number): EventEmitter {
     if (!isPositiveNumber(maxListeners)) {
-      throw new TypeError('MaxListeners number must be a positive number!')
+      throw new TypeError('[events] MaxListeners number must be a positive number!')
     }
 
     this._maxListeners = maxListeners
+
+    return this
   }
 
   /**
@@ -262,12 +264,13 @@ export default class EventEmitter {
 
     if (_events.hasOwnProperty(eventName) && isArray(_events[eventName])) {
       const length = _events[eventName].length
-      _res = length >= this._maxListeners
+      _res = length > this._maxListeners
       if (_res) {
-        console.warn(`
-        The current event ${eventName}(${length}) has exceeded the maximum 
-        number of listeners(${this._maxListeners}), You need to be aware of 
-        the existence of possible EventEmitter memory leak!
+        /* istanbul ignore next */
+        throw new RangeError(`
+        [events] The current event ${eventName}(${length}) has exceeded the maximum 
+        number of listeners(${this._maxListeners}), You need to be aware of the  
+        existence of possible EventEmitter memory leak!
         `)
       }
     }
@@ -320,7 +323,8 @@ export default class EventEmitter {
     prepend = false
   ): EventEmitter {
     if (!isValidEventName(eventName) || !isValidListener(listener)) {
-      throw new TypeError('[_addListener] invalid arguments!')
+      /* istanbul ignore next */
+      throw new TypeError(`[events] Invalid arguments of 'eventName' or 'listener'!`)
     }
 
     const _events = this._getEvents()
@@ -330,7 +334,8 @@ export default class EventEmitter {
     }
 
     if (!isArray(_events[eventName])) {
-      throw new TypeError('[_addListener] events[eventName] must be array!')
+      /* istanbul ignore next */
+      throw new TypeError('[events] The events[eventName] must be array type!')
     }
 
     const prependMethod = prepend ? 'unshift' : 'push'

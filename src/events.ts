@@ -341,7 +341,9 @@ export default class EventEmitter {
     const prependMethod = prepend ? 'unshift' : 'push'
 
     // emit "NEW_LISTENER" before added
-    this.emit(NEW_LISTENER)
+    if (NEW_LISTENER !== eventName) {
+      this.emit(NEW_LISTENER, eventName, listener)
+    }
 
     _events[eventName][prependMethod](createListenerFunction(this, eventName, listener, once))
 

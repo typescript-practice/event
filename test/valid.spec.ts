@@ -19,11 +19,11 @@ test('check if match max listener', () => {
 test('set MaxListeners = 0', () => {
   const events = new EventEmitter()
   events.setMaxListeners(0)
-  const MAX = 100
+  let max = 100
   expect(() => {
-    while (MAX > 0) {
+    while (max > 0) {
       events.on('testName1', NOOP)
-      MAX--
+      max--
     }
     expect(events.listenerCount('testName1')).toEqual(100)
   }).not.toThrow(RangeError)

@@ -62,10 +62,10 @@ export function createListenerFunction(
   once = false
 ) {
   const listenerFunction: any = function(...args: any[]) {
-    listener.apply(events, args)
     if (once) {
       events.removeListener(eventName, listener)
     }
+    listener.apply(events, args)
   }
 
   listenerFunction.listener = listener

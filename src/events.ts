@@ -31,8 +31,10 @@ export default class EventEmitter {
   }
 
   setMaxListeners(maxListeners: number) {
-    if (!isPositiveNumber(maxListeners))
+    if (!isPositiveNumber(maxListeners)) {
       throw new TypeError('MaxListeners number must be a positive number!')
+    }
+
     this._maxListeners = maxListeners
   }
 
@@ -285,8 +287,9 @@ export default class EventEmitter {
     once = false,
     prepend = false
   ): EventEmitter {
-    if (!isValidEventName(eventName) || !isValidListener(listener))
+    if (!isValidEventName(eventName) || !isValidListener(listener)) {
       throw new TypeError('[_addListener] invalid arguments!')
+    }
 
     const _events = this._getEvents()
 
@@ -294,8 +297,9 @@ export default class EventEmitter {
       _events[eventName] = []
     }
 
-    if (!isArray(_events[eventName]))
+    if (!isArray(_events[eventName])) {
       throw new TypeError('[_addListener] events[eventName] must be array!')
+    }
 
     const prependMethod = prepend ? 'unshift' : 'push'
 

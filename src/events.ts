@@ -26,10 +26,32 @@ export default class EventEmitter {
   //   return EventEmitter
   // }
 
-  get _eventsCount() {
-    return this.eventNames().length
+  // get _eventsCount() {
+  //   return this.eventNames().length
+  // }
+
+  /**
+   * Returns the current max listener value for the EventEmitter
+   * which is either set by emitter.setMaxListeners(n) or defaults
+   * to EventEmitter.defaultMaxListeners.
+   * @return {number}
+   */
+  getMaxListeners(): number {
+    return this._maxListeners
   }
 
+  /**
+   * By default EventEmitters will print a warning if more than 10
+   * listeners are added for a particular event. This is a useful
+   * default that helps finding memory leaks. Obviously, not all
+   * events should be limited to just 10 listeners.
+   * The emitter.setMaxListeners() method allows the limit to be
+   * modified for this specific EventEmitter instance. The value
+   * can be set to Infinity (or 0) to indicate an unlimited
+   * number of listeners.
+   * @param {number} maxListeners - The number of max listeners.
+   * @return {number}
+   */
   setMaxListeners(maxListeners: number) {
     if (!isPositiveNumber(maxListeners)) {
       throw new TypeError('MaxListeners number must be a positive number!')
@@ -48,11 +70,13 @@ export default class EventEmitter {
    */
   emit(eventName: EventName, ...args: any[]): boolean {
     const _events = this._getEvents()
-    let flag = false
     if (_events.hasOwnProperty(eventName)) {
-      let listeners: ListenerFunction[] = _events[eventName]
+      let listeners: ListenerFunction[] = _events[eventName].concat()
+      const hasListeners = listeners.length > 0
+
       listeners.forEach(listenerFunction => listenerFunction.apply(this, args))
-      return listeners.length > 0
+
+      return hasListeners
     }
     return false
   }
@@ -66,20 +90,6 @@ export default class EventEmitter {
   eventNames(): EventName[] {
     const _events = this._getEvents()
     return Object.keys(_events) || []
-  }
-
-  /**
-   * Returns the current max listener value for the EventEmitter
-   * which is either set by emitter.setMaxListeners(n) or defaults
-   * to EventEmitter.defaultMaxListeners.
-   * @return {number}
-   */
-  getMaxListeners(): number {
-    if (this._maxListeners === undefined) {
-      this._maxListeners = 0
-    }
-
-    return this._maxListeners
   }
 
   /**
@@ -184,9 +194,12 @@ export default class EventEmitter {
     const _events = this._getEvents()
     if (eventNames && isArray(eventNames) && eventNames.length > 0) {
       // remove the specified eventName list
-      for (const eventName in eventNames) {
-        if (_events.hasOwnProperty(eventName)) {
-          delete _events[eventName]
+      let i = 0
+      let len = eventNames.length
+      for (; len > i; i++) {
+        const _eventName = eventNames[i]
+        if (_events.hasOwnProperty(_eventName)) {
+          delete _events[_eventName]
         }
       }
     } else {
@@ -207,27 +220,17 @@ export default class EventEmitter {
    * @return {EventEmitter}
    */
   removeListener(eventName: EventName, listener: Function): EventEmitter {
-    const _events = this._getEvents()
-    if (!_events.hasOwnProperty(eventName)) return this
+    return this._removeListener(eventName, listener)
+  }
 
-    const listeners = _events[eventName]
-
-    if (isArray(listeners) && listeners.length > 0) {
-      const index = indexOfListener(listeners, listener)
-
-      if (index !== -1) {
-        listeners.splice(index, 1)
-      }
-    }
-
-    if (!isArray(listeners) || listeners.length === 0) {
-      delete _events[eventName]
-    }
-
-    // The 'removeListener' event is emitted after the listener is removed.
-    this.emit(REMOVE_LISTENER)
-
-    return this
+  /**
+   * Removes all listeners, or those of the specified eventName.
+   * @param {EventName} eventName - The name of the event.
+   * @param {Function} listener - The callback function
+   * @return {EventEmitter}
+   */
+  off(eventName: EventName, listener: Function): EventEmitter {
+    return this._removeListener(eventName, listener)
   }
 
   /**
@@ -240,7 +243,7 @@ export default class EventEmitter {
     const _events = this._getEvents()
     let _rawListeners: ListenerFunction[] = []
     if (_events.hasOwnProperty(eventName)) {
-      _rawListeners.concat(_events[eventName])
+      _rawListeners = _events[eventName].concat()
     }
     return _rawListeners
   }
@@ -270,6 +273,35 @@ export default class EventEmitter {
     }
 
     return _res
+  }
+
+  /**
+   * Removes all listeners, or those of the specified eventName.
+   * @param {EventName} eventName - The name of the event.
+   * @param {Function} listener - The callback function
+   * @return {EventEmitter}
+   */
+  private _removeListener(eventName: EventName, listener: Function): EventEmitter {
+    const _events = this._getEvents()
+    if (!_events.hasOwnProperty(eventName)) return this
+
+    const listeners = _events[eventName]
+
+    if (isArray(listeners) && listeners.length > 0) {
+      const index = indexOfListener(listeners, listener)
+      if (index !== -1) {
+        listeners.splice(index, 1)
+      }
+    }
+
+    if (!isArray(listeners) || listeners.length === 0) {
+      delete _events[eventName]
+    }
+
+    // The 'removeListener' event is emitted after the listener is removed.
+    this.emit(REMOVE_LISTENER)
+
+    return this
   }
 
   /**

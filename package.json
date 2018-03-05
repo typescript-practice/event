@@ -1,7 +1,7 @@
 {
   "name": "tp-events",
   "version": "1.0.0",
-  "description": "Used to obtain the current events parameters and configuration",
+  "description": "Nodejs events module in web browser!",
   "keywords": [
     "events",
     "nodejs events",
